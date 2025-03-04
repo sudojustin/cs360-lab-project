@@ -11,7 +11,7 @@
     <a href="products.blade.php" class="button-class">Product List</a>
     <a href="profile.blade.php" class="button-class">Profile</a>
     -->
-    <!-- CSS for the proposed products
+    <!-- CSS for the proposed products -->
     <style>
     body{
         margin-top:20px;
@@ -310,7 +310,7 @@
         }
     }
     </style>
--->
+
 </head>
 <body>
     <div  class="bg-white">
@@ -328,6 +328,7 @@
                 <nav  class="p-6 mt-4 text-white bg-black sm:flex sm:justify-center sm:items-center">
                     <div class="flex flex-col sm:flex-row">
                         <a class="mt-3 hover:underline sm:mx-3 sm:mt-0" href="/">Home</a>
+                        <a href="{{ url('productlistings.blade.php') }}" class="flex items-center justify-end">Products</a>
                         <!-- proposed changes for adding links to the top of the page to navigate between (this has been causing errors)
                         <a href="cart.blade.php" class="button-class">Cart</a>
                         <a href="products.blade.php" class="button-class">Product List</a>
@@ -399,318 +400,16 @@
             </div>
         </div>
     </x-app-layout>
-    <!-- my proposed changes for creating products
-    <div class="container">
-        <div class="col-xs-12 col-md-6">
-            // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="https://fastly.picsum.photos/id/204/200/200.jpg?hmac=gppQCOIV43fSCLsdUCoPQxrc16lrOEvVu2u5nH-I4Zo" class="img-responsive"> 
-                                <span class="tag2 hot"> HOT </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here
-                                    </a>
-                                    <a href="#">
-                                        <span>Product Category</span>
-                                    </a>                            
-
-                                </h5>
-                                <p class="price-container">
-                                    <span>$199</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-        </div>
-        <div class="col-xs-12 col-md-6">
-            // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="images/products/p1.png" alt="194x228" class="img-responsive"> 
-                                <span class="tag2 hot">
-                                    HOT
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here <span>Product Category</span>
-                                    </a>
-                                </h5>
-                                <p class="price-container">
-                                    <span>$50</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-        </div>
-        <div class="col-xs-12 col-md-6">
-        // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="images/products/p2.png" alt="194x228" class="img-responsive"> 
-                                <span class="tag3 special">
-                                    Special
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here <span>Product Category</span>
-                                    </a>
-                                </h5>
-                                <p class="price-container">
-                                    <span>$299</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-        </div>
-        <div class="col-xs-12 col-md-6">
-            // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="images/products/p3.png" alt="194x228" class="img-responsive"> 
-                                <span class="tag2 sale">
-                                    SALE
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here <span>Product Category</span>
-                                    </a>
-                                </h5>
-                                <p class="price-container">
-                                    <span>$1000</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-
-
-                
-        </div>
-
-
-        <div class="col-xs-12 col-md-6">
-            // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="images/products/p3.png" alt="194x228" class="img-responsive"> 
-                                <span class="tag2 sale">
-                                    SALE
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here <span>Product Category</span>
-                                    </a>
-                                </h5>
-                                <p class="price-container">
-                                    <span>$1000</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-
-
-                
-        </div>
-
-        <div class="col-xs-12 col-md-6">
-            // First product box start here
-            <div class="prod-info-main prod-wrap clearfix">
-                <div class="row">
-                        <div class="col-md-5 col-sm-12 col-xs-12">
-                            <div class="product-image"> 
-                                <img src="images/products/p3.png" alt="194x228" class="img-responsive"> 
-                                <span class="tag2 sale">
-                                    SALE
-                                </span> 
-                            </div>
-                        </div>
-                        <div class="col-md-7 col-sm-12 col-xs-12">
-                        <div class="product-deatil">
-                                <h5 class="name">
-                                    <a href="#">
-                                        Product Code/Name here <span>Product Category</span>
-                                    </a>
-                                </h5>
-                                <p class="price-container">
-                                    <span>$1000</span>
-                                </p>
-                                <span class="tag1"></span> 
-                        </div>
-                        <div class="description">
-                            <p>A Short product description here </p>
-                        </div>
-                        <div class="product-info smart-form">
-                            <div class="row">
-                                <div class="col-md-12"> 
-                                    <a href="javascript:void(0);" class="btn btn-danger">Add to cart</a>
-                                    <a href="javascript:void(0);" class="btn btn-info">More info</a>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="rating">Rating:
-                                        <label for="stars-rating-5"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-4"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-3"><i class="fa fa-star text-danger"></i></label>
-                                        <label for="stars-rating-2"><i class="fa fa-star text-warning"></i></label>
-                                        <label for="stars-rating-1"><i class="fa fa-star text-warning"></i></label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            // end product 
-
-
-                
-        </div>
+    <!-- my proposed changes for creating products -->
+    <div class="card">
+        <img src="{{ asset('https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg') }}" alt="Denim Jeans">
+        <h1>Tailored Jeans</h1>
+        <p class="price">$19.99</p>
+        <p>Some text about the jeans..</p>
+        <p><button>Add to Cart</button></p>
     </div>
--->
+
+
 </body>
 </html>
 
