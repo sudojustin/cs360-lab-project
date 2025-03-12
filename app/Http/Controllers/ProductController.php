@@ -7,10 +7,22 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function productList()
+    /*public function productList()*/
+    /*{*/
+    /*    $products = Product::all();*/
+    /**/
+    /*    return view('dashboard', compact('products'));*/
+    /*}*/
+
+    public function showDashboard()
     {
         $products = Product::all();
+        return view('dashboard', compact('products')); // Pass products to the dashboard view
+    }
 
-        return view('products', compact('products'));
+    public function showProducts()
+    {
+        $products = Product::all();
+        return view('products', compact('products')); // Pass products to the products view
     }
 }
