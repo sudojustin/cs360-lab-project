@@ -33,6 +33,12 @@ new class extends Component { /** Log the current user out of the application.
                     </x-nav-link>
                 </div>
 
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders')" wire:navigate>
+                        {{ __('Orders') }}
+                    </x-nav-link>
+                </div>
+
                 @auth
                     @if(auth()->user()->isAdmin())
                         <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
