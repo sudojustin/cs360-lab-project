@@ -17,6 +17,7 @@ Route::get('/', [ProductController::class, 'showDashboard'])
 
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'showAdminDashboard'])->name('admin');
+    Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
 });
 
 Route::view('profile', 'profile')
