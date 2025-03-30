@@ -32,11 +32,11 @@
                     <table class="min-w-full table-auto mt-4 border-collapse">
                         <thead>
                             <tr class="bg-gray-100">
-                                <th class="px-4 py-2 border-b">ID</th>
-                                <th class="px-4 py-2 border-b">Name</th>
-                                <th class="px-4 py-2 border-b">Email</th>
-                                <th class="px-4 py-2 border-b">Admin</th>
-                                <th class="px-4 py-2 border-b">Actions</th>
+                                <th class="px-4 py-2 border-b text-left">ID</th>
+                                <th class="px-4 py-2 border-b text-left">Name</th>
+                                <th class="px-4 py-2 border-b text-left">Email</th>
+                                <th class="px-4 py-2 border-b text-left">Admin</th>
+                                <th class="px-4 py-2 border-b text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -82,12 +82,12 @@
                     <table class="min-w-full table-auto mt-4 border-collapse">
                         <thead>
                             <tr class="bg-gray-100">
-                                <th class="px-4 py-2 border-b">ID</th>
-                                <th class="px-4 py-2 border-b">Name</th>
-                                <th class="px-4 py-2 border-b">Price</th>
-                                <th class="px-4 py-2 border-b">Description</th>
-                                <th class="px-4 py-2 border-b">Image</th>
-                                <th class="px-4 py-2 border-b">Actions</th>
+                                <th class="px-4 py-2 border-b text-left">ID</th>
+                                <th class="px-4 py-2 border-b text-left">Name</th>
+                                <th class="px-4 py-2 border-b text-left">Price</th>
+                                <th class="px-4 py-2 border-b text-left">Description</th>
+                                <th class="px-4 py-2 border-b text-left">Image</th>
+                                <th class="px-4 py-2 border-b text-left">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
