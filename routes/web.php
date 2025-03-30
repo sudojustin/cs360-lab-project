@@ -18,6 +18,9 @@ Route::get('/', [ProductController::class, 'showDashboard'])
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'showAdminDashboard'])->name('admin');
     Route::delete('/admin/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.users.delete');
+    Route::delete('/admin/products/{product}', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
+    Route::get('/admin/products/create', [AdminController::class, 'createProductForm'])->name('admin.products.create');
+    Route::post('/admin/products', [AdminController::class, 'storeProduct'])->name('admin.products.store');
 });
 
 Route::view('profile', 'profile')

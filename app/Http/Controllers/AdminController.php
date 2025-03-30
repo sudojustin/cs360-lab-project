@@ -36,4 +36,38 @@ class AdminController extends Controller
         
         return redirect()->route('admin')->with('success', 'User deleted successfully.');
     }
+    
+    public function deleteProduct(Product $product)
+    {
+        // Delete the product
+        $product->delete();
+        
+        return redirect()->route('admin')->with('success', 'Product deleted successfully.');
+    }
+    
+    public function createProductForm()
+    {
+        return view('create-product');
+    }
+    
+    public function storeProduct(Request $request)
+    {
+        // Validate the product data
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'description' => 'required|string',
+            'image' => 'nullable|url',
+        ]);
+        
+        // Set default image if none provided
+        if (empty($validated['image'])) {
+            $validated['image'] = 'https://placehold.co/600x400?text=No+Image+Available';
+        }
+        
+        // Create the new product
+        Product::create($validated);
+        
+        return redirect()->route('admin')->with('success', 'Product created successfully.');
+    }
 }

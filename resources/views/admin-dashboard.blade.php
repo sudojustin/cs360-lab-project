@@ -72,7 +72,12 @@
 
                 <!-- Product Table -->
                 <div class="p-6 text-gray-900">
-                    <h3 class="font-semibold text-xl">Product List</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-xl">Product List</h3>
+                        <a href="{{ route('admin.products.create') }}" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                            Add New Product
+                        </a>
+                    </div>
 
                     <table class="min-w-full table-auto mt-4 border-collapse">
                         <thead>
@@ -82,6 +87,7 @@
                                 <th class="px-4 py-2 border-b">Price</th>
                                 <th class="px-4 py-2 border-b">Description</th>
                                 <th class="px-4 py-2 border-b">Image</th>
+                                <th class="px-4 py-2 border-b">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -93,6 +99,14 @@
                                     <td class="px-4 py-2 border-b">{{ $product->description }}</td>
                                     <td class="px-4 py-2 border-b">
                                         <img src="{{ $product->image }}" alt="{{ $product->name }}" class="h-16 w-16 object-cover">
+                                    </td>
+                                    <td class="px-4 py-2 border-b">
+                                        <form action="{{ route('admin.products.delete', $product) }}" method="POST" class="inline"
+                                              onsubmit="return confirm('Are you sure you want to delete this product?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="px-3 py-1 bg-red-500 text-white rounded">Delete</button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
