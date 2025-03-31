@@ -18,11 +18,35 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 @foreach($orders as $order)
                     <div class="mb-6 p-4 border-b">
-                        <h3 class="text-xl font-semibold">Order #{{ $order->id }}</h3>
-                        <p>Status: {{ $order->status }}</p>
-                        <p>Total Price: ${{ $order->total_price }}</p>
-                        <p>Placed at: {{ $order->placed_at }}</p>
-                        <!-- Add more order details as needed -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="text-xl font-semibold">Order #{{ $order->id }}</h3>
+                                <p class="text-gray-600">Status: <span class="font-medium">{{ ucfirst($order->status) }}</span></p>
+                                <p class="text-gray-600">Total Price: <span class="font-medium">${{ number_format($order->total_price, 2) }}</span></p>
+                                <p class="text-gray-600">Placed at: <span class="font-medium">{{ $order->placed_at->format('F j, Y g:i A') }}</span></p>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h4 class="font-semibold mb-2">Order Items:</h4>
+                            <div class="space-y-2">
+                                @foreach($order->products as $product)
+                                    <div class="flex items-center justify-between py-2 border-b border-gray-100">
+                                        <div class="flex items-center">
+                                            <img src="{{ $product->image }}" alt="{{ $product->name }}" class="w-16 h-16 object-cover rounded-md mr-4">
+                                            <div>
+                                                <p class="font-medium">{{ $product->name }}</p>
+                                                <p class="text-gray-600">Quantity: {{ $product->pivot->quantity }}</p>
+                                                <p class="text-gray-600">Price: ${{ number_format($product->pivot->price, 2) }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="font-medium">${{ number_format($product->pivot->price * $product->pivot->quantity, 2) }}</p>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 @endforeach
             </div>
