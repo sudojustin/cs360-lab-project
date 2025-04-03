@@ -17,6 +17,7 @@ return new class extends Migration
             $table->double('price');
             $table->text('description');
             $table->string('image');
+            $table->string('category')->default('uncategorized');
             $table->timestamps();
         });
     }
