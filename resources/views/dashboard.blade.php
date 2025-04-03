@@ -61,6 +61,30 @@
         </div>
     </div>
 
+    <!-- Special Offers Banner -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-md overflow-hidden relative">
+            <div class="md:flex items-center justify-between">
+                <div class="p-6 md:w-2/3">
+                    <h3 class="text-xl font-bold text-white mb-2">Special Offer - Limited Time!</h3>
+                    <p class="text-yellow-50 mb-4">Get 20% off on all products with code: <span class="font-bold bg-white bg-opacity-25 px-2 py-1 rounded">SPRING20</span></p>
+                    <a href="{{ route('products') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-yellow-600 bg-white hover:bg-yellow-50 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                        Shop Now
+                    </a>
+                </div>
+                <div class="hidden md:block md:w-1/3">
+                    <div class="p-6 relative">
+                        <div class="absolute top-1/2 right-8 transform -translate-y-1/2 w-32 h-32 bg-white bg-opacity-30 rounded-full"></div>
+                        <div class="absolute top-1/2 right-10 transform -translate-y-1/2 rotate-12">
+                            <div class="text-5xl font-extrabold text-white">20%</div>
+                            <div class="text-xl font-bold text-white">OFF</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Featured Products Section -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
         <div class="bg-white rounded-lg shadow-md overflow-hidden">
@@ -72,8 +96,8 @@
                     </a>
                 </div>
                 
-                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    @foreach ($products as $product)
+                <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ($products->take(4) as $product)
                     <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
                         <div class="relative">
                             <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="w-full h-60 object-cover">
@@ -110,6 +134,65 @@
         </div>
     </div>
 
+    <!-- Featured Products Banner - Horizontal Scroll -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg shadow-lg overflow-hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-2xl font-bold text-white">Trending Now</h3>
+                        <p class="text-purple-100">Check out our hottest products this week</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="scroll-left" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                            </svg>
+                        </button>
+                        <button id="scroll-right" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white p-2 rounded-full focus:outline-none">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div id="trending-products" class="flex overflow-x-auto pb-4 snap-x hide-scrollbar">
+                        @foreach ($randomProducts as $product)
+                        <div class="flex-none w-64 mr-4 snap-start">
+                            <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden h-full">
+                                <div class="relative">
+                                    <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="w-full h-40 object-cover">
+                                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-3">
+                                        <span class="text-white font-bold">${{ $product->price }}</span>
+                                    </div>
+                                </div>
+                                <div class="p-4">
+                                    <h4 class="font-medium text-gray-800 truncate">{{ $product->name }}</h4>
+                                    <div class="mt-2">
+                                        <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <input type="hidden" value="{{ $product->id }}" name="id">
+                                            <input type="hidden" value="{{ $product->name }}" name="name">
+                                            <input type="hidden" value="{{ $product->price }}" name="price">
+                                            <input type="hidden" value="{{ $product->image }}" name="image">
+                                            <input type="hidden" value="1" name="quantity">
+                                            <button class="w-full px-3 py-1.5 text-white bg-purple-600 hover:bg-purple-700 rounded-md transition duration-150 ease-in-out shadow-sm text-sm">
+                                                Quick Add
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Auto-hide login message after 3 seconds
         document.addEventListener('DOMContentLoaded', function() {
@@ -122,6 +205,33 @@
                     }, 500); // Wait for fade out animation to complete
                 }
             }, 3000); // 3 seconds
+
+            // Horizontal scroll buttons for trending products
+            const scrollContainer = document.getElementById('trending-products');
+            const scrollLeftBtn = document.getElementById('scroll-left');
+            const scrollRightBtn = document.getElementById('scroll-right');
+            
+            scrollLeftBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({ left: -300, behavior: 'smooth' });
+            });
+            
+            scrollRightBtn.addEventListener('click', () => {
+                scrollContainer.scrollBy({ left: 300, behavior: 'smooth' });
+            });
         });
     </script>
+
+    <style>
+        /* Hide scrollbar but keep functionality */
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;  /* Chrome, Safari and Opera */
+        }
+    </style>
+
+    <!-- Footer Component -->
+    <x-footer />
 </x-app-layout>

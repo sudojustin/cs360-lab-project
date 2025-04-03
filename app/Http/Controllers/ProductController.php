@@ -17,7 +17,8 @@ class ProductController extends Controller
     public function showDashboard()
     {
         $products = Product::all();
-        return view('dashboard', compact('products')); // Pass products to the dashboard view
+        $randomProducts = Product::inRandomOrder()->limit(8)->get();
+        return view('dashboard', compact('products', 'randomProducts')); // Pass products to the dashboard view
     }
 
     public function showProducts()
