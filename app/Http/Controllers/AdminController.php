@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Product;
+use App\Models\Order;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
@@ -15,8 +16,11 @@ class AdminController extends Controller
         
         // Fetches all products
         $products = Product::all();
+        
+        // Fetches all orders with user relationship
+        $orders = Order::with('user')->latest()->get();
 
-        return view('admin-dashboard', compact('users', 'products')); // Pass users and products to the view
+        return view('admin-dashboard', compact('users', 'products', 'orders')); // Pass users, products, and orders to the view
     }
     
     public function deleteUser(User $user)
@@ -69,5 +73,27 @@ class AdminController extends Controller
         Product::create($validated);
         
         return redirect()->route('admin')->with('success', 'Product created successfully.');
+    }
+
+    public function showOrder(Order $order)
+    {
+        // Load the order with its related products and user
+        $order->load(['products', 'user']);
+        
+        return view('admin-order-details', compact('order'));
+    }
+    
+    public function updateOrder(Request $request, Order $order)
+    {
+        // Validate the request
+        $request->validate([
+            'status' => 'required|in:pending,processing,completed,cancelled'
+        ]);
+        
+        // Update the order status
+        $order->status = $request->status;
+        $order->save();
+        
+        return redirect()->route('admin.orders.show', $order)->with('success', 'Order status updated successfully.');
     }
 }

@@ -166,6 +166,56 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Orders Table -->
+            <div class="mt-6 bg-white overflow-hidden shadow-md rounded-lg">
+                <div class="p-6">
+                    <h3 class="font-bold text-xl text-gray-800 mb-4">Order Management</h3>
+
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full table-auto border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th class="px-4 py-3 border-b border-gray-200">Order ID</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Customer</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Date</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Total</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Status</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($orders as $order)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-4 py-3 whitespace-nowrap">#{{ $order->id }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-800">{{ $order->user->name }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">{{ $order->created_at->format('M d, Y') }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap text-indigo-600 font-bold">${{ number_format($order->total_price, 2) }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if($order->status == 'completed') bg-green-100 text-green-800
+                                                @elseif($order->status == 'processing') bg-blue-100 text-blue-800
+                                                @elseif($order->status == 'cancelled') bg-red-100 text-red-800
+                                                @else bg-yellow-100 text-yellow-800 @endif">
+                                                {{ ucfirst($order->status) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <a href="{{ route('admin.orders.show', $order) }}" class="px-3 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md text-sm transition-colors shadow-sm flex items-center inline-flex">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                </svg>
+                                                View Details
+                                            </a>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

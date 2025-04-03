@@ -46,7 +46,7 @@
                         @foreach ($products as $product)
                         <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
                             <div class="relative">
-                                <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="w-full h-60 object-cover">
+                                <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="w-full h-60 object-cover cursor-pointer" onclick="openProductModal({{ $product->id }})">
                             </div>
                             <div class="p-4">
                                 <div class="flex items-center justify-between mb-2">
@@ -78,3 +78,74 @@
         </div>
     </div>
 </x-app-layout>
+
+<!-- Product Modal -->
+<div id="productModal" class="fixed inset-0 z-50 hidden overflow-y-auto" aria-modal="true">
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeProductModal()"></div>
+        
+        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full">
+            <div class="absolute right-0 top-0 p-4">
+                <button type="button" onclick="closeProductModal()" class="text-gray-400 hover:text-gray-500">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-6" id="productModalContent">
+                <!-- Content will be loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openProductModal(productId) {
+        const products = @json($products);
+        const product = products.find(p => p.id === productId);
+        
+        if (product) {
+            const content = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <img src="${product.image}" alt="${product.name}" class="w-full rounded-lg object-cover">
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-800 mb-2">${product.name}</h3>
+                        <div class="text-xl font-bold text-indigo-600 mb-4">$${product.price}</div>
+                        <div class="prose prose-sm text-gray-600 mb-6">
+                            ${product.description || 'No description available'}
+                        </div>
+                        <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <input type="hidden" value="${product.id}" name="id">
+                            <input type="hidden" value="${product.name}" name="name">
+                            <input type="hidden" value="${product.price}" name="price">
+                            <input type="hidden" value="${product.image}" name="image">
+                            <div class="flex items-center mb-4">
+                                <label class="block text-gray-700 mr-3">Quantity:</label>
+                                <input type="number" name="quantity" value="1" min="1" class="w-16 px-2 py-1 border border-gray-300 rounded">
+                            </div>
+                            <button class="w-full px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-md transition duration-150 ease-in-out shadow-sm flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Add To Cart
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('productModalContent').innerHTML = content;
+            document.getElementById('productModal').classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+        }
+    }
+    
+    function closeProductModal() {
+        document.getElementById('productModal').classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    }
+</script>
