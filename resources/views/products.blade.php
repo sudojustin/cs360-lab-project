@@ -48,14 +48,14 @@
                             <div class="relative">
                                 <img src="{{ url($product->image) }}" alt="{{ $product->name }}" class="w-full h-60 object-cover cursor-pointer" onclick="openProductModal({{ $product->id }})">
                             </div>
-                            <div class="p-4">
+                            <div class="p-4 flex flex-col h-[180px]">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-lg font-medium text-gray-800">{{ $product->name }}</h3>
+                                    <h3 class="text-lg font-medium text-gray-800 truncate">{{ $product->name }}</h3>
                                     <span class="text-lg font-bold text-indigo-600">${{ $product->price }}</span>
                                 </div>
-                                <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ $product->description ?? 'No description available' }}</p>
+                                <p class="text-sm text-gray-500 mb-4 overflow-hidden line-clamp-2 h-10">{{ $product->description ?? 'No description available' }}</p>
                                 
-                                <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data" class="mt-auto">
                                     @csrf
                                     <input type="hidden" value="{{ $product->id }}" name="id">
                                     <input type="hidden" value="{{ $product->name }}" name="name">
@@ -84,8 +84,8 @@
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="fixed inset-0 bg-gray-900 bg-opacity-75 transition-opacity" onclick="closeProductModal()"></div>
         
-        <div class="relative w-full max-w-2xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full">
-            <div class="absolute right-0 top-0 p-4">
+        <div class="relative w-full max-w-3xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all sm:w-full">
+            <div class="absolute right-0 top-0 p-4 z-10">
                 <button type="button" onclick="closeProductModal()" class="text-gray-400 hover:text-gray-500">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -108,13 +108,13 @@
         if (product) {
             const content = `
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <img src="${product.image}" alt="${product.name}" class="w-full rounded-lg object-cover">
+                    <div class="flex items-center justify-center">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-64 rounded-lg object-contain">
                     </div>
                     <div>
-                        <h3 class="text-2xl font-bold text-gray-800 mb-2">${product.name}</h3>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-1">${product.name}</h3>
                         <div class="text-xl font-bold text-indigo-600 mb-4">$${product.price}</div>
-                        <div class="prose prose-sm text-gray-600 mb-6">
+                        <div class="prose prose-sm text-gray-600 mb-5 max-h-40 overflow-y-auto">
                             ${product.description || 'No description available'}
                         </div>
                         <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data">
@@ -149,3 +149,24 @@
         document.body.classList.remove('overflow-hidden');
     }
 </script>
+
+<style>
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(156, 163, 175, 0.5) rgba(229, 231, 235, 0.5);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(229, 231, 235, 0.5);
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(156, 163, 175, 0.5);
+        border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(107, 114, 128, 0.5);
+    }
+</style>

@@ -60,7 +60,7 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('admin.products.store') }}" class="space-y-6">
+                    <form method="POST" action="{{ route('admin.products.store') }}" class="space-y-6" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Product Name -->
@@ -86,15 +86,37 @@
                             <textarea id="description" name="description" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="4" required placeholder="Enter product description">{{ old('description') }}</textarea>
                         </div>
 
-                        <!-- Image URL -->
+                        <!-- Image Options -->
                         <div>
-                            <x-input-label for="image" :value="__('Image URL')" class="text-gray-700 font-medium"/>
-                            <x-text-input id="image" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" type="url" name="image" :value="old('image')" placeholder="https://example.com/image.jpg" />
-                            <p class="text-sm text-gray-500 mt-1 flex items-center">
+                            <x-input-label :value="__('Product Image')" class="text-gray-700 font-medium mb-2"/>
+                            
+                            <div class="space-y-4">
+                                <!-- Image Upload Option -->
+                                <div>
+                                    <div class="flex items-center mb-1">
+                                        <input id="image_type_file" type="radio" name="image_type" value="file" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500" checked>
+                                        <label for="image_type_file" class="ml-2 block text-sm font-medium text-gray-700">Upload Image File</label>
+                                    </div>
+                                    <div class="mt-1 flex items-center">
+                                        <input type="file" id="image_file" name="image_file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" accept="image/*">
+                                    </div>
+                                </div>
+
+                                <!-- Image URL Option -->
+                                <div>
+                                    <div class="flex items-center mb-1">
+                                        <input id="image_type_url" type="radio" name="image_type" value="url" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                        <label for="image_type_url" class="ml-2 block text-sm font-medium text-gray-700">Use Image URL</label>
+                                    </div>
+                                    <x-text-input id="image_url" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" type="url" name="image_url" :value="old('image_url')" placeholder="https://example.com/image.jpg" />
+                                </div>
+                            </div>
+                            
+                            <p class="text-sm text-gray-500 mt-2 flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                Enter a direct URL to an image. If left empty, a default image will be used.
+                                Upload an image file or provide a direct URL. If none provided, a default image will be used.
                             </p>
                         </div>
 
@@ -117,4 +139,35 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const imageTypeFile = document.getElementById('image_type_file');
+            const imageTypeUrl = document.getElementById('image_type_url');
+            const imageFileInput = document.getElementById('image_file');
+            const imageUrlInput = document.getElementById('image_url');
+
+            // Function to toggle input visibility
+            function toggleImageInputs() {
+                if (imageTypeFile.checked) {
+                    imageFileInput.parentElement.classList.remove('opacity-50');
+                    imageFileInput.disabled = false;
+                    imageUrlInput.parentElement.classList.add('opacity-50');
+                    imageUrlInput.disabled = true;
+                } else {
+                    imageFileInput.parentElement.classList.add('opacity-50');
+                    imageFileInput.disabled = true;
+                    imageUrlInput.parentElement.classList.remove('opacity-50');
+                    imageUrlInput.disabled = false;
+                }
+            }
+
+            // Set initial state
+            toggleImageInputs();
+
+            // Add event listeners
+            imageTypeFile.addEventListener('change', toggleImageInputs);
+            imageTypeUrl.addEventListener('change', toggleImageInputs);
+        });
+    </script>
 </x-app-layout> 

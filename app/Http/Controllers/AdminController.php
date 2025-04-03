@@ -56,21 +56,40 @@ class AdminController extends Controller
     
     public function storeProduct(Request $request)
     {
-        // Validate the product data
+        // Basic validation for product data
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'required|numeric|min:0',
             'description' => 'required|string',
-            'image' => 'nullable|url',
+            'image_type' => 'required|in:file,url',
+            'image_url' => 'nullable|url',
+            'image_file' => 'nullable|image|max:2048', // Max 2MB
         ]);
         
+        // Initialize image url variable
+        $imageUrl = null;
+        
+        // Process image based on type
+        if ($request->image_type === 'url' && !empty($request->image_url)) {
+            $imageUrl = $request->image_url;
+        } elseif ($request->image_type === 'file' && $request->hasFile('image_file')) {
+            // Store the uploaded file
+            $path = $request->file('image_file')->store('products', 'public');
+            $imageUrl = asset('storage/' . $path);
+        }
+        
         // Set default image if none provided
-        if (empty($validated['image'])) {
-            $validated['image'] = 'https://placehold.co/600x400?text=No+Image+Available';
+        if (empty($imageUrl)) {
+            $imageUrl = 'https://placehold.co/600x400?text=No+Image+Available';
         }
         
         // Create the new product
-        Product::create($validated);
+        Product::create([
+            'name' => $validated['name'],
+            'price' => $validated['price'],
+            'description' => $validated['description'],
+            'image' => $imageUrl,
+        ]);
         
         return redirect()->route('admin')->with('success', 'Product created successfully.');
     }

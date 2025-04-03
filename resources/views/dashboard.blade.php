@@ -81,14 +81,14 @@
                                 Featured
                             </div>
                         </div>
-                        <div class="p-4">
+                        <div class="p-4 flex flex-col h-[180px]">
                             <div class="flex items-center justify-between mb-2">
-                                <h3 class="text-lg font-medium text-gray-800">{{ $product->name }}</h3>
+                                <h3 class="text-lg font-medium text-gray-800 truncate">{{ $product->name }}</h3>
                                 <span class="text-lg font-bold text-indigo-600">${{ $product->price }}</span>
                             </div>
-                            <p class="text-sm text-gray-500 mb-4 line-clamp-2">{{ $product->description ?? 'No description available' }}</p>
+                            <p class="text-sm text-gray-500 mb-4 overflow-hidden line-clamp-2 h-10">{{ $product->description ?? 'No description available' }}</p>
                             
-                            <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data" class="mt-auto">
                                 @csrf
                                 <input type="hidden" value="{{ $product->id }}" name="id">
                                 <input type="hidden" value="{{ $product->name }}" name="name">
