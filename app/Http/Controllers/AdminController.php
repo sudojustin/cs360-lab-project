@@ -64,6 +64,8 @@ class AdminController extends Controller
             'image_type' => 'required|in:file,url',
             'image_url' => 'nullable|url',
             'image_file' => 'nullable|image|max:2048', // Max 2MB
+            'stock' => 'required|integer|min:0',
+            'category' => 'required|string',
         ]);
         
         // Initialize image url variable
@@ -89,6 +91,8 @@ class AdminController extends Controller
             'price' => $validated['price'],
             'description' => $validated['description'],
             'image' => $imageUrl,
+            'category' => $validated['category'],
+            'stock' => $validated['stock'],
         ]);
         
         return redirect()->route('admin')->with('success', 'Product created successfully.');
@@ -114,5 +118,19 @@ class AdminController extends Controller
         $order->save();
         
         return redirect()->route('admin.orders.show', $order)->with('success', 'Order status updated successfully.');
+    }
+    
+    public function updateStock(Request $request, Product $product)
+    {
+        // Validate the request
+        $request->validate([
+            'stock' => 'required|integer|min:0',
+        ]);
+        
+        // Update the product stock
+        $product->stock = $request->stock;
+        $product->save();
+        
+        return redirect()->route('admin')->with('success', 'Product stock updated successfully.');
     }
 }

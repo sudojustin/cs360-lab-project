@@ -130,6 +130,7 @@
                                     <th class="px-4 py-3 border-b border-gray-200">Image</th>
                                     <th class="px-4 py-3 border-b border-gray-200">Name</th>
                                     <th class="px-4 py-3 border-b border-gray-200">Price</th>
+                                    <th class="px-4 py-3 border-b border-gray-200">Stock</th>
                                     <th class="px-4 py-3 border-b border-gray-200 w-1/4">Description</th>
                                     <th class="px-4 py-3 border-b border-gray-200">Actions</th>
                                 </tr>
@@ -143,6 +144,34 @@
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-800">{{ $product->name }}</td>
                                         <td class="px-4 py-3 whitespace-nowrap text-indigo-600 font-bold">${{ $product->price }}</td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            <form action="{{ route('admin.products.stock.update', $product) }}" method="POST" class="flex items-center" id="stock-form-{{ $product->id }}">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input 
+                                                    type="number" 
+                                                    name="stock" 
+                                                    value="{{ $product->stock }}" 
+                                                    min="0" 
+                                                    class="w-16 border border-gray-300 rounded-md py-1 px-2 mr-2 focus:ring-indigo-500 focus:border-indigo-500 text-center"
+                                                >
+                                                <button 
+                                                    type="submit" 
+                                                    class="px-2 py-1 bg-indigo-500 hover:bg-indigo-600 text-white rounded-md text-xs transition-colors shadow-sm"
+                                                >
+                                                    Update
+                                                </button>
+                                            </form>
+                                            @if($product->stock <= 5 && $product->stock > 0)
+                                                <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-amber-100 text-amber-800">
+                                                    Low Stock
+                                                </span>
+                                            @elseif($product->stock <= 0)
+                                                <span class="mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                                    Out of Stock
+                                                </span>
+                                            @endif
+                                        </td>
                                         <td class="px-4 py-3">
                                             <div class="text-sm text-gray-500 overflow-hidden line-clamp-2">{{ $product->description }}</div>
                                         </td>

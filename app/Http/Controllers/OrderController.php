@@ -20,6 +20,20 @@ class OrderController extends Controller
     {
         $user = auth()->user();  // Get the authenticated user
 
+        // Check if cart is empty
+        if (Cart::isEmpty()) {
+            return redirect()->route('cart.list')->with('error', 'Your cart is empty. Please add items before checking out.');
+        }
+        
+        // Verify products are in stock before creating the order
+        foreach (Cart::getContent() as $item) {
+            $product = \App\Models\Product::find($item->id);
+            
+            if (!$product || $product->stock < $item->quantity) {
+                return redirect()->route('cart.list')->with('error', 'Some items in your cart are no longer available in the requested quantity. Please update your cart.');
+            }
+        }
+
         // Create a new order
         $order = Order::create([
             'user_id' => $user->id,
@@ -32,12 +46,17 @@ class OrderController extends Controller
             'placed_at' => now(),
         ]);
 
-        // Add the products to the order
+        // Add the products to the order and reduce stock
         foreach (Cart::getContent() as $item) {
             $order->products()->attach($item->id, [
                 'quantity' => $item->quantity,
                 'price' => $item->price,
             ]);
+            
+            // Reduce product stock
+            $product = \App\Models\Product::find($item->id);
+            $product->stock -= $item->quantity;
+            $product->save();
         }
 
         // Clear the cart

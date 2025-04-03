@@ -21,6 +21,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/products/{product}', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
     Route::get('/admin/products/create', [AdminController::class, 'createProductForm'])->name('admin.products.create');
     Route::post('/admin/products', [AdminController::class, 'storeProduct'])->name('admin.products.store');
+    Route::patch('/admin/products/{product}/stock', [AdminController::class, 'updateStock'])->name('admin.products.stock.update');
     Route::get('/admin/orders/{order}', [AdminController::class, 'showOrder'])->name('admin.orders.show');
     Route::patch('/admin/orders/{order}', [AdminController::class, 'updateOrder'])->name('admin.orders.update');
 });

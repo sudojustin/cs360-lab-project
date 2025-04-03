@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('description');
             $table->string('image');
             $table->string('category')->default('uncategorized');
+            $table->integer('stock')->default(0);
             $table->timestamps();
         });
     }

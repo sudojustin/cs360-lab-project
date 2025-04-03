@@ -86,6 +86,26 @@
                             <textarea id="description" name="description" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" rows="4" required placeholder="Enter product description">{{ old('description') }}</textarea>
                         </div>
 
+                        <!-- Stock -->
+                        <div>
+                            <x-input-label for="stock" :value="__('Stock Quantity')" class="text-gray-700 font-medium"/>
+                            <x-text-input id="stock" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" type="number" name="stock" min="0" :value="old('stock', 0)" required placeholder="Enter available quantity" />
+                            <p class="text-sm text-gray-500 mt-1">Enter the number of items in stock</p>
+                        </div>
+
+                        <!-- Category -->
+                        <div>
+                            <x-input-label for="category" :value="__('Category')" class="text-gray-700 font-medium"/>
+                            <select id="category" name="category" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="electronics" {{ old('category') == 'electronics' ? 'selected' : '' }}>Electronics</option>
+                                <option value="fashion" {{ old('category') == 'fashion' ? 'selected' : '' }}>Fashion</option>
+                                <option value="beauty" {{ old('category') == 'beauty' ? 'selected' : '' }}>Beauty</option>
+                                <option value="home" {{ old('category') == 'home' ? 'selected' : '' }}>Home & Living</option>
+                                <option value="sports" {{ old('category') == 'sports' ? 'selected' : '' }}>Sports</option>
+                                <option value="uncategorized" {{ old('category') == 'uncategorized' ? 'selected' : '' }}>Uncategorized</option>
+                            </select>
+                        </div>
+
                         <!-- Image Options -->
                         <div>
                             <x-input-label :value="__('Product Image')" class="text-gray-700 font-medium mb-2"/>
