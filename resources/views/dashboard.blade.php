@@ -231,7 +231,4 @@
             display: none;  /* Chrome, Safari and Opera */
         }
     </style>
-
-    <!-- Footer Component -->
-    <x-footer />
 </x-app-layout>

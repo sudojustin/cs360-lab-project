@@ -402,6 +402,3 @@
         background: rgba(107, 114, 128, 0.5);
     }
 </style>
-
-<!-- Footer Component -->
-<x-footer />

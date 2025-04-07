@@ -72,7 +72,4 @@
             </div>
         </div>
     </div>
-    
-    <!-- Footer Component -->
-    <x-footer />
 </x-app-layout>

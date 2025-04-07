@@ -389,7 +389,4 @@
             @endif
         </div>
     </div>
-
-    <!-- Footer Component -->
-    <x-footer />
 </x-app-layout>
