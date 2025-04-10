@@ -244,25 +244,38 @@
                             </div>
                             <div class="p-4 flex flex-col h-[180px]">
                                 <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-lg font-medium text-gray-800 truncate">{{ $product->name }}</h3>
+                                    <a href="{{ route('products.show', $product) }}" class="text-lg font-medium text-gray-800 truncate hover:text-indigo-600">{{ $product->name }}</a>
                                     <span class="text-lg font-bold text-indigo-600">${{ $product->price }}</span>
                                 </div>
+                                
+                                <div class="flex items-center mb-2">
+                                    <div class="text-yellow-400 text-sm">
+                                        @for($i = 0; $i < 5; $i++)
+                                            @if($i < $product->averageRating())
+                                                ★
+                                            @else
+                                                ☆
+                                            @endif
+                                        @endfor
+                                    </div>
+                                    <span class="ml-1 text-xs text-gray-500">({{ $product->reviews()->count() }})</span>
+                                </div>
+                                
                                 <p class="text-sm text-gray-500 mb-4 overflow-hidden line-clamp-2 h-10">{{ $product->description ?? 'No description available' }}</p>
                                 
-                                <form action="{{ route('cart.store') }}" method="POST" enctype="multipart/form-data" class="mt-auto">
-                                    @csrf
-                                    <input type="hidden" value="{{ $product->id }}" name="id">
-                                    <input type="hidden" value="{{ $product->name }}" name="name">
-                                    <input type="hidden" value="{{ $product->price }}" name="price">
-                                    <input type="hidden" value="{{ $product->image }}" name="image">
-                                    <input type="hidden" value="1" name="quantity">
-                                    <button class="w-full px-4 py-2 text-white bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 rounded-md transition duration-150 ease-in-out shadow-sm flex items-center justify-center">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                        Add To Cart
-                                    </button>
-                                </form>
+                                <div class="mt-auto flex justify-between items-center">
+                                    <a href="{{ route('products.show', $product) }}" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                                        View Details
+                                    </a>
+                                    <form action="{{ route('cart.store') }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="bg-indigo-600 text-white px-3 py-1 rounded-md text-sm hover:bg-indigo-700">
+                                            Add to Cart
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                         @endforeach
