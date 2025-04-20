@@ -48,9 +48,9 @@ RUN touch /var/www/html/database/database.sqlite || true
 RUN chmod 777 /var/www/html/database/database.sqlite || true
 RUN chmod -R 777 /var/www/html/database
 
-# Create startup script to ensure proper permissions
-RUN echo '#!/bin/bash\nchmod -R 777 /var/www/html/storage\nchmod -R 777 /var/www/html/database\nchmod -R 777 /var/www/html/bootstrap/cache\ntouch /var/www/html/database/database.sqlite || true\nchmod 777 /var/www/html/database/database.sqlite || true\nexec "$@"' > /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+# Create a setup script
+COPY ./start.sh /start.sh
+RUN chmod +x /start.sh
 
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Use the base image's start script
 CMD ["/start.sh"]
