@@ -8,7 +8,4 @@ export default defineConfig({
             refresh: true,
         }),
     ],
-    preview: {
-        allowedHosts: ['cs360-lab-project.onrender.com'],
-    },
 });
