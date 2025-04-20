@@ -1,4 +1,4 @@
-FROM richarvey/nginx-php-fpm:2.1.2
+FROM richarvey/nginx-php-fpm:3.1.4
  
 COPY . .
  
@@ -16,5 +16,10 @@ ENV LOG_CHANNEL stderr
  
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_PROCESS_TIMEOUT 2000
+
+# Ignore platform requirements to prevent errors
+ENV COMPOSER_ALLOW_SUPERUSER 1
+ENV COMPOSER_MEMORY_LIMIT -1
  
 CMD ["/start.sh"]
