@@ -48,6 +48,9 @@ RUN touch /var/www/html/database/database.sqlite || true
 RUN chmod 777 /var/www/html/database/database.sqlite || true
 RUN chmod -R 777 /var/www/html/database
 
+# Copy custom nginx configuration
+COPY ./conf/nginx/nginx-site.conf /etc/nginx/sites-available/default.conf
+
 # Create a setup script
 COPY ./start.sh /start.sh
 RUN chmod +x /start.sh
