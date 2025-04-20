@@ -1,40 +1,54 @@
-FROM php:8.1-fpm
+FROM php:8.1-cli
 
-# Install dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
+    git \
+    curl \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    sqlite3 \
+    libsqlite3-dev \
     zip \
-    unzip \
-    curl \
-    git
+    unzip
 
 # Clear cache
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd xml
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN docker-php-ext-install pdo_sqlite
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 # Set working directory
-WORKDIR /var/www
+WORKDIR /app
 
-# Copy existing application directory
-COPY . .
+# Copy the entire application
+COPY . /app
 
-# Install application dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Set file permissions
+RUN chmod -R 775 /app/storage /app/bootstrap/cache
 
-# Generate key and optimize application
+# Install dependencies
+RUN composer install --no-interaction --no-dev --optimize-autoloader
+
+# Create SQLite database
+RUN touch /tmp/database.sqlite
+RUN chmod 777 /tmp/database.sqlite
+
+# Set up environment
+COPY .env.example .env
 RUN php artisan key:generate
-RUN php artisan optimize
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+RUN php artisan migrate --force
+RUN php artisan db:seed --force
 
-# Set permissions
-RUN chown -R www-data:www-data /var/www
-
-# Expose port 10000 and start php server
+# Expose port 10000
 EXPOSE 10000
+
+# Start PHP server
 CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=10000"] 
