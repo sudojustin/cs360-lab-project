@@ -2,14 +2,15 @@ services:
   - type: web
     name: laravel-app
     runtime: php
-    buildCommand: bash render-build.sh
+    buildCommand: composer install && npm ci && npm run build && cp .env.example .env && php artisan key:generate && touch database/database.sqlite && chmod -R 777 storage bootstrap/cache database && php artisan migrate --force && php artisan db:seed --force
     startCommand: php artisan serve --host=0.0.0.0 --port=$PORT
-    plan: free
     envVars:
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
+      - key: LOG_CHANNEL
+        value: stderr
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
