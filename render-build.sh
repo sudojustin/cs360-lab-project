@@ -10,8 +10,10 @@ mv composer.phar /usr/local/bin/composer
 
 # Laravel setup
 composer install --no-dev
+npm install
+npm run build
 cp .env.example .env
 php artisan key:generate
-touch /tmp/database.sqlite
+touch database/database.sqlite
 php artisan migrate --force
 php artisan db:seed --force
