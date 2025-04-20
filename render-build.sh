@@ -1,19 +1,33 @@
 #!/usr/bin/env bash
 
 # Install PHP & dependencies
-apt-get update
-apt-get install -y php php-mbstring php-xml php-bcmath php-curl php-sqlite3 unzip curl git
+apt-get update && apt-get install -y \
+    php8.1-cli \
+    php8.1-common \
+    php8.1-mbstring \
+    php8.1-xml \
+    php8.1-zip \
+    php8.1-sqlite3 \
+    php8.1-curl \
+    php8.1-gd \
+    unzip \
+    curl \
+    git
 
 # Install Composer
 curl -sS https://getcomposer.org/installer | php
 mv composer.phar /usr/local/bin/composer
 
-# Laravel setup
+# Install dependencies
 composer install --no-dev
-npm install
-npm run build
+
+# Laravel setup
 cp .env.example .env
 php artisan key:generate
+mkdir -p database
 touch database/database.sqlite
+chmod -R 777 storage bootstrap/cache database
 php artisan migrate --force
 php artisan db:seed --force
+npm install
+npm run build
