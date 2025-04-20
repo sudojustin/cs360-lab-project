@@ -31,10 +31,9 @@ RUN chmod -R 777 /var/www/html/storage
 RUN chmod -R 777 /var/www/html/database
 RUN chmod -R 777 /var/www/html/bootstrap/cache
 
-# Install Node.js and build assets
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
-RUN npm ci
-RUN npm run build
+# Install Node.js and build assets for Alpine
+RUN apk add --update nodejs npm
+RUN cd /var/www/html && npm ci
+RUN cd /var/www/html && npm run build
  
 CMD ["/start.sh"]
