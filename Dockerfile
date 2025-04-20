@@ -36,6 +36,9 @@ RUN apk add --update nodejs npm
 RUN cd /var/www/html && npm ci
 RUN cd /var/www/html && npm run build
 
+# Install Composer dependencies
+RUN cd /var/www/html && composer install --no-dev --optimize-autoloader
+
 # Publish Livewire assets
 RUN cd /var/www/html && php artisan livewire:publish --assets
  
