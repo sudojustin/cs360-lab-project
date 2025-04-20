@@ -16,6 +16,7 @@ ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 ENV SESSION_DRIVER cookie
 ENV CACHE_DRIVER file
+ENV CACHE_STORE file
 ENV QUEUE_CONNECTION sync
  
 # Allow composer to run as root
