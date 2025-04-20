@@ -14,3 +14,4 @@ cp .env.example .env
 php artisan key:generate
 touch /tmp/database.sqlite
 php artisan migrate --force
+php artisan db:seed --force
