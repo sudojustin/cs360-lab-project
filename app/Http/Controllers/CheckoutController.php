@@ -44,15 +44,17 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store only essential shipping info in session
-        session(['checkout.shipping' => [
-            'n' => $request->name,
-            'a' => $request->address,
-            'c' => $request->city,
-            's' => $request->state,
-            'z' => $request->zip_code,
-            'p' => $request->phone
-        ]]);
+        // Store minimal shipping data with very short keys and values
+        $shipping = [
+            'n' => substr($request->name, 0, 100),
+            'a' => substr($request->address, 0, 100),
+            'c' => substr($request->city, 0, 50),
+            's' => substr($request->state, 0, 20),
+            'z' => substr($request->zip_code, 0, 10),
+            'p' => substr($request->phone, 0, 15)
+        ];
+        
+        session(['cs' => $shipping]);
         
         // Proceed to payment method
         return redirect()->route('checkout.payment');
@@ -62,7 +64,7 @@ class CheckoutController extends Controller
     public function payment()
     {
         // Check if shipping information is provided
-        if (!session()->has('checkout.shipping')) {
+        if (!session()->has('cs')) {
             return redirect()->route('checkout.shipping')->with('error', 'Please provide shipping information first.');
         }
         
@@ -89,14 +91,11 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store minimal payment info in session
-        session([
-            'checkout.payment' => [
-                'm' => $request->payment_method,
-                'p' => 'Credit Card',
-                't' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 8))
-            ]
-        ]);
+        // Store minimal payment data
+        session(['cp' => [
+            'm' => $request->payment_method,
+            'i' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))
+        ]]);
         
         // Proceed to review
         return redirect()->route('checkout.review');
@@ -106,12 +105,12 @@ class CheckoutController extends Controller
     public function review()
     {
         // Check if all information is provided
-        if (!session()->has('checkout.shipping') || !session()->has('checkout.payment')) {
+        if (!session()->has('cs') || !session()->has('cp')) {
             return redirect()->route('checkout.shipping')->with('error', 'Please complete all checkout steps.');
         }
         
         // Format shipping address for display
-        $shipping = session('checkout.shipping');
+        $shipping = session('cs');
         $shipping_address = $shipping['n'] . "\n" . 
                           $shipping['a'] . "\n" . 
                           $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
@@ -121,7 +120,7 @@ class CheckoutController extends Controller
             'cart_items' => Cart::getContent(),
             'cart_total' => Cart::getTotal(),
             'shipping_address' => $shipping_address,
-            'payment_method' => session('checkout.payment.m')
+            'payment_method' => session('cp.m')
         ]);
     }
     
@@ -129,7 +128,7 @@ class CheckoutController extends Controller
     public function placeOrder()
     {
         // Verify all required information is available
-        if (!session()->has('checkout.shipping') || !session()->has('checkout.payment')) {
+        if (!session()->has('cs') || !session()->has('cp')) {
             return redirect()->route('checkout.shipping')
                 ->with('error', 'Please complete all checkout steps.');
         }
@@ -153,14 +152,14 @@ class CheckoutController extends Controller
         }
 
         // Format shipping address from session data
-        $shipping = session('checkout.shipping');
+        $shipping = session('cs');
         $shipping_address = $shipping['n'] . "\n" . 
                           $shipping['a'] . "\n" . 
                           $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
                           "Phone: " . $shipping['p'];
 
         // Get payment info from session
-        $payment = session('checkout.payment');
+        $payment = session('cp');
 
         // Create a new order
         $order = Order::create([
@@ -169,8 +168,8 @@ class CheckoutController extends Controller
             'total_price' => Cart::getTotal(),
             'shipping_address' => $shipping_address,
             'payment_status' => 'completed',
-            'payment_provider' => $payment['p'],
-            'payment_transaction_id' => $payment['t'],
+            'payment_provider' => 'Credit Card',
+            'payment_transaction_id' => $payment['i'],
             'placed_at' => now(),
         ]);
 
@@ -189,7 +188,7 @@ class CheckoutController extends Controller
 
         // Clear the cart and checkout session data
         Cart::clear();
-        session()->forget(['checkout.shipping', 'checkout.payment']);
+        session()->forget(['cs', 'cp']);
 
         // Redirect to confirmation page
         return redirect()->route('checkout.confirmation', ['order' => $order->id]);
