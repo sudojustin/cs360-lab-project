@@ -35,5 +35,8 @@ RUN chmod -R 777 /var/www/html/bootstrap/cache
 RUN apk add --update nodejs npm
 RUN cd /var/www/html && npm ci
 RUN cd /var/www/html && npm run build
+
+# Publish Livewire assets
+RUN cd /var/www/html && php artisan livewire:publish --assets
  
 CMD ["/start.sh"]
