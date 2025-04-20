@@ -16,6 +16,7 @@ ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
 ENV SESSION_DRIVER cookie
 ENV CACHE_DRIVER file
+ENV QUEUE_CONNECTION sync
  
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
@@ -41,5 +42,15 @@ RUN cd /var/www/html && composer install --no-dev --optimize-autoloader
 
 # Publish Livewire assets
 RUN cd /var/www/html && php artisan livewire:publish --assets
- 
+
+# Additional permission fixes for SQLite database
+RUN touch /var/www/html/database/database.sqlite || true
+RUN chmod 777 /var/www/html/database/database.sqlite || true
+RUN chmod -R 777 /var/www/html/database
+
+# Create startup script to ensure proper permissions
+RUN echo '#!/bin/bash\nchmod -R 777 /var/www/html/storage\nchmod -R 777 /var/www/html/database\nchmod -R 777 /var/www/html/bootstrap/cache\ntouch /var/www/html/database/database.sqlite || true\nchmod 777 /var/www/html/database/database.sqlite || true\nexec "$@"' > /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["/start.sh"]
