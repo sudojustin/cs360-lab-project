@@ -13,13 +13,21 @@ ENV REAL_IP_HEADER 1
 ENV APP_ENV production
 ENV APP_DEBUG false
 ENV LOG_CHANNEL stderr
+ENV SESSION_DRIVER cookie
+ENV CACHE_DRIVER file
  
 # Allow composer to run as root
 ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_PROCESS_TIMEOUT 2000
-
-# Ignore platform requirements to prevent errors
-ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_MEMORY_LIMIT -1
+ 
+# Fix permissions
+RUN mkdir -p /var/www/html/database
+RUN mkdir -p /var/www/html/storage/framework/sessions
+RUN mkdir -p /var/www/html/storage/framework/views
+RUN mkdir -p /var/www/html/storage/framework/cache
+RUN chmod -R 777 /var/www/html/storage
+RUN chmod -R 777 /var/www/html/database
+RUN chmod -R 777 /var/www/html/bootstrap/cache
  
 CMD ["/start.sh"]
