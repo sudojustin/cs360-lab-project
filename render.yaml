@@ -1,14 +1,17 @@
 services:
   - type: web
     name: laravel-app
-    env: php
-    buildCommand: cp .env.example .env && php artisan key:generate && touch database/database.sqlite && composer install && php artisan migrate --force && php artisan db:seed --force
-    startCommand: heroku-php-apache2 public/
+    env: docker
+    healthCheckPath: /
     envVars:
+      - key: APP_KEY
+        generateValue: true
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
         value: false
+      - key: LOG_CHANNEL
+        value: stderr
       - key: DB_CONNECTION
         value: sqlite
       - key: DB_DATABASE
