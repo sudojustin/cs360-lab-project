@@ -44,14 +44,14 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store shipping info in session - store as array instead of string
+        // Store only essential shipping info in session
         session(['checkout.shipping' => [
-            'name' => $request->name,
-            'address' => $request->address,
-            'city' => $request->city,
-            'state' => $request->state,
-            'zip_code' => $request->zip_code,
-            'phone' => $request->phone
+            'n' => $request->name,
+            'a' => $request->address,
+            'c' => $request->city,
+            's' => $request->state,
+            'z' => $request->zip_code,
+            'p' => $request->phone
         ]]);
         
         // Proceed to payment method
@@ -92,9 +92,9 @@ class CheckoutController extends Controller
         // Store minimal payment info in session
         session([
             'checkout.payment' => [
-                'method' => $request->payment_method,
-                'provider' => 'Credit Card',
-                'transaction_id' => 'SIMULATED_' . strtoupper(substr(md5(uniqid()), 0, 10))
+                'm' => $request->payment_method,
+                'p' => 'Credit Card',
+                't' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 8))
             ]
         ]);
         
@@ -110,14 +110,18 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.shipping')->with('error', 'Please complete all checkout steps.');
         }
         
+        // Format shipping address for display
+        $shipping = session('checkout.shipping');
+        $shipping_address = $shipping['n'] . "\n" . 
+                          $shipping['a'] . "\n" . 
+                          $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
+                          "Phone: " . $shipping['p'];
+        
         return view('checkout.review', [
             'cart_items' => Cart::getContent(),
             'cart_total' => Cart::getTotal(),
-            'shipping_address' => session('checkout.shipping.name') . "\n" . 
-                              session('checkout.shipping.address') . "\n" . 
-                              session('checkout.shipping.city') . ", " . session('checkout.shipping.state') . " " . session('checkout.shipping.zip_code') . "\n" .
-                              "Phone: " . session('checkout.shipping.phone'),
-            'payment_method' => session('checkout.payment.method')
+            'shipping_address' => $shipping_address,
+            'payment_method' => session('checkout.payment.m')
         ]);
     }
     
@@ -150,10 +154,10 @@ class CheckoutController extends Controller
 
         // Format shipping address from session data
         $shipping = session('checkout.shipping');
-        $shipping_address = $shipping['name'] . "\n" . 
-                          $shipping['address'] . "\n" . 
-                          $shipping['city'] . ", " . $shipping['state'] . " " . $shipping['zip_code'] . "\n" .
-                          "Phone: " . $shipping['phone'];
+        $shipping_address = $shipping['n'] . "\n" . 
+                          $shipping['a'] . "\n" . 
+                          $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
+                          "Phone: " . $shipping['p'];
 
         // Get payment info from session
         $payment = session('checkout.payment');
@@ -165,8 +169,8 @@ class CheckoutController extends Controller
             'total_price' => Cart::getTotal(),
             'shipping_address' => $shipping_address,
             'payment_status' => 'completed',
-            'payment_provider' => $payment['provider'],
-            'payment_transaction_id' => $payment['transaction_id'],
+            'payment_provider' => $payment['p'],
+            'payment_transaction_id' => $payment['t'],
             'placed_at' => now(),
         ]);
 
