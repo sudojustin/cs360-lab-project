@@ -23,7 +23,7 @@ return [
      *
      * the configuration for persisting cart
      */
-    'storage' => null,
+    'storage' => \Darryldecode\Cart\Storage\SessionStorage::class,
 
     /*
      * ---------------------------------------------------------------
@@ -33,4 +33,13 @@ return [
      * the configuration for cart events
      */
     'events' => null,
+    
+    /*
+     * ---------------------------------------------------------------
+     * cart limits
+     * ---------------------------------------------------------------
+     *
+     * the configuration for cart item limits and validation
+     */
+    'max_items' => 100, // Set a high limit for number of unique items
 ];

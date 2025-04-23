@@ -12,7 +12,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register the cart storage service
+        $this->app->bind('cart_storage', function($app) {
+            return new \Darryldecode\Cart\Storage\SessionStorage();
+        });
     }
 
     /**

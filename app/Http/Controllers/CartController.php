@@ -8,9 +8,42 @@ class CartController extends Controller
 {
     public function cartList()
     {
-        $cartItems = \Cart::getContent();
-        // dd($cartItems);
-        return view('cart', compact('cartItems'));
+        try {
+            // Get cart items
+            $cartItems = \Cart::getContent();
+            
+            // Log cart contents for debugging
+            \Log::info('Cart list accessed', [
+                'cart_count' => $cartItems->count(),
+                'cart_items' => $cartItems->toArray(),
+                'cart_total' => \Cart::getTotal()
+            ]);
+            
+            // If we somehow have no cart items but should, try to recover
+            if ($cartItems->isEmpty() && session()->has('last_known_cart')) {
+                \Log::warning('Attempting to recover cart from session', [
+                    'last_known_cart' => session('last_known_cart')
+                ]);
+                
+                // We could implement recovery here if needed
+            }
+            
+            // Store current cart in session for potential recovery
+            if (!$cartItems->isEmpty()) {
+                session(['last_known_cart' => $cartItems->toArray()]);
+            }
+            
+            return view('cart', compact('cartItems'));
+        } catch (\Exception $e) {
+            \Log::error('Exception in cart list', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Handle error gracefully
+            $cartItems = collect([]);
+            return view('cart', compact('cartItems'))->with('error', 'There was an issue loading your cart. Please try again.');
+        }
     }
 
 
@@ -33,43 +66,81 @@ class CartController extends Controller
             $requestedQty = 1;
         }
         
-        // Get current cart quantity for this product if it exists
-        $cartItem = \Cart::get($request->id);
-        $currentQtyInCart = $cartItem ? (int) $cartItem->quantity : 0;
-        $totalQtyNeeded = $currentQtyInCart + $requestedQty;
-        
-        // Check if enough stock
-        if ($product->stock < $totalQtyNeeded) {
-            if ($product->stock <= 0) {
-                session()->flash('error', 'This product is out of stock!');
-            } else if ($currentQtyInCart > 0) {
-                session()->flash('error', "Only {$product->stock} items available. You already have {$currentQtyInCart} in your cart.");
-            } else {
-                session()->flash('error', "Only {$product->stock} items available.");
+        try {
+            // Get current cart quantity for this product if it exists
+            $cartItem = \Cart::get($request->id);
+            $currentQtyInCart = $cartItem ? (int) $cartItem->quantity : 0;
+            $totalQtyNeeded = $currentQtyInCart + $requestedQty;
+            
+            // Check if enough stock
+            if ($product->stock < $totalQtyNeeded) {
+                if ($product->stock <= 0) {
+                    session()->flash('error', 'This product is out of stock!');
+                } else if ($currentQtyInCart > 0) {
+                    session()->flash('error', "Only {$product->stock} items available. You already have {$currentQtyInCart} in your cart.");
+                } else {
+                    session()->flash('error', "Only {$product->stock} items available.");
+                }
+                return redirect()->back();
             }
+            
+            // Get all cart items before adding - for debugging
+            $cartItems = \Cart::getContent()->toArray();
+            
+            // Log the cart before adding
+            \Log::info('Cart before adding item', [
+                'cart_count' => count($cartItems),
+                'cart_items' => $cartItems,
+                'adding_product' => [
+                    'id' => $request->id,
+                    'name' => $request->name,
+                    'quantity' => $requestedQty
+                ]
+            ]);
+            
+            // Try to add to cart - with error handling
+            \Cart::add([
+                'id' => $request->id,
+                'name' => $request->name,
+                'price' => $request->price,
+                'quantity' => $requestedQty,
+                'attributes' => array(
+                    'image' => $request->image,
+                )
+            ]);
+            
+            // Get cart items after adding - for debugging
+            $updatedCart = \Cart::getContent()->toArray();
+            
+            // Log the cart after adding
+            \Log::info('Cart after adding item', [
+                'cart_count' => count($updatedCart),
+                'cart_items' => $updatedCart
+            ]);
+            
+            // Verify the item was added successfully
+            if (!isset($updatedCart[$request->id])) {
+                \Log::error('Failed to add item to cart', [
+                    'product_id' => $request->id,
+                    'product_name' => $request->name
+                ]);
+                session()->flash('error', 'There was an issue adding the product to your cart. Please try again.');
+            } else {
+                session()->flash('success', 'Product is Added to Cart Successfully!');
+            }
+            
+            return redirect()->route('cart.list');
+        } catch (\Exception $e) {
+            \Log::error('Exception adding to cart', [
+                'product_id' => $request->id,
+                'product_name' => $product->name,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            session()->flash('error', 'There was an error adding the product to your cart. Please try again.');
             return redirect()->back();
         }
-        
-        // Log the cart add for debugging
-        \Log::info('Adding to cart', [
-            'product_id' => $request->id,
-            'product_name' => $product->name,
-            'quantity' => $requestedQty,
-            'current_in_cart' => $currentQtyInCart
-        ]);
-        
-        \Cart::add([
-            'id' => $request->id,
-            'name' => $request->name,
-            'price' => $request->price,
-            'quantity' => $requestedQty,
-            'attributes' => array(
-                'image' => $request->image,
-            )
-        ]);
-        session()->flash('success', 'Product is Added to Cart Successfully!');
-
-        return redirect()->route('cart.list');
     }
 
     public function updateCart(Request $request)
