@@ -20,9 +20,18 @@ class CheckoutController extends Controller
         // Get the authenticated user
         $user = auth()->user();
         
+        // Get cart items and ensure quantities are integers
+        $cartItems = Cart::getContent();
+        
+        // Log cart data for debugging
+        \Log::info('Shipping page with cart data', [
+            'cart_count' => $cartItems->count(),
+            'cart_items' => $cartItems->toArray()
+        ]);
+        
         return view('checkout.shipping', [
             'user' => $user,
-            'cart_items' => Cart::getContent(),
+            'cart_items' => $cartItems,
             'cart_total' => Cart::getTotal()
         ]);
     }
@@ -74,17 +83,20 @@ class CheckoutController extends Controller
         $user = auth()->user();
         $userData = json_decode($user->temp_data ?? '{}', true);
         
+        // Get cart items and ensure quantities are integers
+        $cartItems = Cart::getContent();
+        
         // Debug logging
         \Log::info('Payment method called', [
             'user_id' => $user->id,
             'user_data' => $userData,
-            'cart_count' => Cart::getContent()->count(),
-            'cart_items' => Cart::getContent()->toArray()
+            'cart_count' => $cartItems->count(),
+            'cart_items' => $cartItems->toArray()
         ]);
         
         // Show the payment form
         return view('checkout.payment', [
-            'cart_items' => Cart::getContent(),
+            'cart_items' => $cartItems,
             'cart_total' => Cart::getTotal()
         ]);
     }
@@ -138,11 +150,15 @@ class CheckoutController extends Controller
         $user = auth()->user();
         $userData = json_decode($user->temp_data ?? '{}', true);
         
+        // Get cart items and ensure quantities are integers
+        $cartItems = Cart::getContent();
+        
         // Debug session state
         \Log::info('Review method called', [
             'user_id' => $user->id,
             'user_data' => $userData,
-            'cart_count' => Cart::getContent()->count()
+            'cart_count' => $cartItems->count(),
+            'cart_items' => $cartItems->toArray()
         ]);
         
         // Format address
@@ -160,7 +176,7 @@ class CheckoutController extends Controller
         
         // Show the review page
         return view('checkout.review', [
-            'cart_items' => Cart::getContent(),
+            'cart_items' => $cartItems,
             'cart_total' => Cart::getTotal(),
             'shipping_address' => $shipping_address,
             'payment_method' => $payment_method
@@ -235,14 +251,26 @@ class CheckoutController extends Controller
         foreach ($cartItems as $item) {
             $product = \App\Models\Product::find($item->id);
             
+            // Make sure quantity is handled as integer
+            $quantity = (int) $item->quantity;
+            
+            // Log the order item for debugging
+            \Log::info('Adding product to order', [
+                'product_id' => $item->id,
+                'product_name' => $item->name,
+                'quantity' => $quantity,
+                'price' => $item->price,
+                'quantity_type' => gettype($item->quantity)
+            ]);
+            
             // Attach product to order with quantity and price
             $order->products()->attach($item->id, [
-                'quantity' => $item->quantity,
+                'quantity' => $quantity,
                 'price' => $item->price,
             ]);
             
             // Reduce product stock
-            $product->stock -= $item->quantity;
+            $product->stock -= $quantity;
             $product->save();
         }
 
