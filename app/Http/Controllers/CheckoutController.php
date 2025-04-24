@@ -44,17 +44,23 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store minimal shipping data with very short keys and values
+        // Store shipping data in session
         $shipping = [
-            'n' => substr($request->name, 0, 100),
-            'a' => substr($request->address, 0, 100),
-            'c' => substr($request->city, 0, 50),
-            's' => substr($request->state, 0, 20),
-            'z' => substr($request->zip_code, 0, 10),
-            'p' => substr($request->phone, 0, 15)
+            'n' => $request->name,
+            'a' => $request->address,
+            'c' => $request->city,
+            's' => $request->state,
+            'z' => $request->zip_code,
+            'p' => $request->phone
         ];
         
-        session(['cs' => $shipping]);
+        // Store shipping data in session
+        session()->put('cs', $shipping);
+        session()->save();
+        
+        // Debug information
+        \Log::info('Shipping data stored in session', ['shipping' => $shipping]);
+        \Log::info('Cart contents', ['items' => Cart::getContent()->toArray()]);
         
         // Proceed to payment method
         return redirect()->route('checkout.payment');
@@ -68,9 +74,25 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.shipping')->with('error', 'Please provide shipping information first.');
         }
         
+        // Check if cart is empty
+        if (Cart::isEmpty()) {
+            return redirect()->route('cart.list')->with('error', 'Your cart is empty. Please add items before checking out.');
+        }
+        
+        // Get cart contents for display
+        $cartItems = Cart::getContent();
+        $cartTotal = Cart::getTotal();
+        
+        // Log for debugging
+        \Log::info('Payment page cart contents', [
+            'items_count' => $cartItems->count(),
+            'total' => $cartTotal,
+            'session_shipping' => session('cs')
+        ]);
+        
         return view('checkout.payment', [
-            'cart_items' => Cart::getContent(),
-            'cart_total' => Cart::getTotal()
+            'cart_items' => $cartItems,
+            'cart_total' => $cartTotal
         ]);
     }
     
@@ -91,11 +113,22 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store minimal payment data
-        session(['cp' => [
+        // Store payment data
+        $paymentData = [
             'm' => $request->payment_method,
             'i' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))
-        ]]);
+        ];
+        
+        // Store payment data in session
+        session()->put('cp', $paymentData);
+        session()->save();
+        
+        // Log for debugging
+        \Log::info('Payment data stored', [
+            'payment' => $paymentData,
+            'cart_items' => Cart::getContent()->count(),
+            'cart_total' => Cart::getTotal()
+        ]);
         
         // Proceed to review
         return redirect()->route('checkout.review');
@@ -109,6 +142,15 @@ class CheckoutController extends Controller
             return redirect()->route('checkout.shipping')->with('error', 'Please complete all checkout steps.');
         }
         
+        // Check if cart is empty
+        if (Cart::isEmpty()) {
+            return redirect()->route('cart.list')->with('error', 'Your cart is empty. Please add items before checking out.');
+        }
+        
+        // Get cart contents for display
+        $cartItems = Cart::getContent();
+        $cartTotal = Cart::getTotal();
+        
         // Format shipping address for display
         $shipping = session('cs');
         $shipping_address = $shipping['n'] . "\n" . 
@@ -116,9 +158,17 @@ class CheckoutController extends Controller
                           $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
                           "Phone: " . $shipping['p'];
         
+        // Log for debugging
+        \Log::info('Review page cart contents', [
+            'items_count' => $cartItems->count(),
+            'total' => $cartTotal,
+            'session_shipping' => $shipping,
+            'payment_method' => session('cp.m')
+        ]);
+        
         return view('checkout.review', [
-            'cart_items' => Cart::getContent(),
-            'cart_total' => Cart::getTotal(),
+            'cart_items' => $cartItems,
+            'cart_total' => $cartTotal,
             'shipping_address' => $shipping_address,
             'payment_method' => session('cp.m')
         ]);
