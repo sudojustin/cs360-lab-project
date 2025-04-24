@@ -141,8 +141,10 @@ class CheckoutController extends Controller
         
         $user = auth()->user();
         
-        // Verify products are in stock before creating the order
-        foreach (Cart::getContent() as $item) {
+        // Get all cart items and verify each product is in stock
+        $cartItems = Cart::getContent();
+        
+        foreach ($cartItems as $item) {
             $product = \App\Models\Product::find($item->id);
             
             if (!$product || $product->stock < $item->quantity) {
@@ -173,15 +175,17 @@ class CheckoutController extends Controller
             'placed_at' => now(),
         ]);
 
-        // Add the products to the order and reduce stock
-        foreach (Cart::getContent() as $item) {
+        // Add all products from the cart to the order with their original quantities
+        foreach ($cartItems as $item) {
+            $product = \App\Models\Product::find($item->id);
+            
+            // Attach product to order with quantity and price
             $order->products()->attach($item->id, [
                 'quantity' => $item->quantity,
                 'price' => $item->price,
             ]);
             
             // Reduce product stock
-            $product = \App\Models\Product::find($item->id);
             $product->stock -= $item->quantity;
             $product->save();
         }
