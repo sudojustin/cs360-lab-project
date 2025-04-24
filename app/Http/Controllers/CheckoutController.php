@@ -44,20 +44,25 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store shipping data - using the original full keys
-        $shipping = [
-            'name' => $request->name,
-            'address' => $request->address,
-            'city' => $request->city,
-            'state' => $request->state,
-            'zip_code' => $request->zip_code,
-            'phone' => $request->phone
-        ];
-        
-        session(['shipping_info' => $shipping]);
+        // Store shipping data directly in the user model temporarily
+        $user = auth()->user();
+        $user->temp_data = json_encode([
+            'shipping' => [
+                'name' => $request->name,
+                'address' => $request->address,
+                'city' => $request->city,
+                'state' => $request->state,
+                'zip_code' => $request->zip_code,
+                'phone' => $request->phone
+            ]
+        ]);
+        $user->save();
         
         // Log for debugging
-        \Log::info('Shipping data stored', ['shipping' => $shipping]);
+        \Log::info('Shipping data stored in user model', [
+            'user_id' => $user->id, 
+            'shipping' => json_decode($user->temp_data, true)
+        ]);
         
         // Proceed to payment method
         return redirect()->route('checkout.payment');
@@ -66,19 +71,18 @@ class CheckoutController extends Controller
     // Step 2: Payment method selection
     public function payment()
     {
-        // Get the shipping info from session
-        $shipping = session('shipping_info');
+        $user = auth()->user();
+        $userData = json_decode($user->temp_data ?? '{}', true);
         
         // Debug logging
         \Log::info('Payment method called', [
-            'shipping_info' => $shipping,
-            'has_shipping_info' => session()->has('shipping_info'),
+            'user_id' => $user->id,
+            'user_data' => $userData,
             'cart_count' => Cart::getContent()->count(),
-            'cart_items' => Cart::getContent()->toArray(),
-            'all_session' => session()->all()
+            'cart_items' => Cart::getContent()->toArray()
         ]);
         
-        // Don't redirect, just show the payment form regardless
+        // Show the payment form
         return view('checkout.payment', [
             'cart_items' => Cart::getContent(),
             'cart_total' => Cart::getTotal()
@@ -88,7 +92,7 @@ class CheckoutController extends Controller
     // Process payment method
     public function processPayment(Request $request)
     {
-        // Validate payment information (for format only - no actual processing)
+        // Validate payment information
         $validator = Validator::make($request->all(), [
             'payment_method' => 'required|in:credit_card',
             'card_number' => 'required|string|min:15|max:16',
@@ -102,17 +106,24 @@ class CheckoutController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
         
-        // Store payment data with full keys
-        $paymentData = [
+        // Get user and current temp data
+        $user = auth()->user();
+        $userData = json_decode($user->temp_data ?? '{}', true);
+        
+        // Add payment data
+        $userData['payment'] = [
             'payment_method' => $request->payment_method,
             'transaction_id' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))
         ];
         
-        session(['payment_info' => $paymentData]);
+        // Store updated data
+        $user->temp_data = json_encode($userData);
+        $user->save();
         
         // Log for debugging
-        \Log::info('Payment data stored', [
-            'payment' => $paymentData,
+        \Log::info('Payment data stored in user model', [
+            'user_id' => $user->id,
+            'user_data' => $userData,
             'items_count' => Cart::getContent()->count()
         ]);
         
@@ -123,49 +134,51 @@ class CheckoutController extends Controller
     // Step 3: Order review
     public function review()
     {
-        // Get session data
-        $shipping = session('shipping_info');
-        $payment = session('payment_info');
+        // Get user data
+        $user = auth()->user();
+        $userData = json_decode($user->temp_data ?? '{}', true);
         
         // Debug session state
         \Log::info('Review method called', [
-            'shipping_info' => $shipping,
-            'payment_info' => $payment,
-            'has_shipping' => session()->has('shipping_info'),
-            'has_payment' => session()->has('payment_info'),
-            'cart_count' => Cart::getContent()->count(),
-            'all_session' => session()->all()
+            'user_id' => $user->id,
+            'user_data' => $userData,
+            'cart_count' => Cart::getContent()->count()
         ]);
         
         // Format address
         $shipping_address = '';
-        if ($shipping) {
+        if (!empty($userData['shipping'])) {
+            $shipping = $userData['shipping'];
             $shipping_address = $shipping['name'] . "\n" . 
                                $shipping['address'] . "\n" . 
                                $shipping['city'] . ", " . $shipping['state'] . " " . $shipping['zip_code'] . "\n" .
                                "Phone: " . $shipping['phone'];
         }
         
-        // Show the review page regardless of session state
+        // Get payment method
+        $payment_method = !empty($userData['payment']) ? $userData['payment']['payment_method'] : 'Credit Card';
+        
+        // Show the review page
         return view('checkout.review', [
             'cart_items' => Cart::getContent(),
             'cart_total' => Cart::getTotal(),
             'shipping_address' => $shipping_address,
-            'payment_method' => $payment ? $payment['payment_method'] : 'Credit Card'
+            'payment_method' => $payment_method
         ]);
     }
     
     // Process the order
     public function placeOrder()
     {
+        // Get user data
+        $user = auth()->user();
+        $userData = json_decode($user->temp_data ?? '{}', true);
+        
         // Debug session state
         \Log::info('PlaceOrder method called', [
-            'shipping_info' => session('shipping_info'),
-            'payment_info' => session('payment_info'),
-            'has_shipping' => session()->has('shipping_info'),
-            'has_payment' => session()->has('payment_info'),
-            'cart_count' => Cart::getContent()->count(),
-            'all_session' => session()->all()
+            'user_id' => $user->id,
+            'user_data' => $userData,
+            'cart_count' => Cart::getContent()->count()
         ]);
         
         // Check if cart is empty
@@ -174,17 +187,15 @@ class CheckoutController extends Controller
                 ->with('error', 'Your cart is empty. Please add items before checking out.');
         }
         
-        // Get session data
-        $shipping = session('shipping_info', []);
-        $payment = session('payment_info', []);
-        
         // Validate data is present
-        if (empty($shipping) || empty($payment)) {
+        if (empty($userData['shipping']) || empty($userData['payment'])) {
+            \Log::error('Missing shipping or payment data', [
+                'user_id' => $user->id,
+                'user_data' => $userData
+            ]);
             return redirect()->route('checkout.shipping')
                 ->with('error', 'Missing shipping or payment information. Please complete all checkout steps.');
         }
-        
-        $user = auth()->user();
         
         // Get all cart items and verify each product is in stock
         $cartItems = Cart::getContent();
@@ -198,11 +209,15 @@ class CheckoutController extends Controller
             }
         }
 
-        // Format shipping address from session data
+        // Format shipping address from user data
+        $shipping = $userData['shipping'];
         $shipping_address = $shipping['name'] . "\n" . 
                           $shipping['address'] . "\n" . 
                           $shipping['city'] . ", " . $shipping['state'] . " " . $shipping['zip_code'] . "\n" .
                           "Phone: " . $shipping['phone'];
+
+        // Get payment info from user data
+        $payment = $userData['payment'];
 
         // Create a new order
         $order = Order::create([
@@ -212,7 +227,7 @@ class CheckoutController extends Controller
             'shipping_address' => $shipping_address,
             'payment_status' => 'completed',
             'payment_provider' => 'Credit Card',
-            'payment_transaction_id' => $payment['transaction_id'] ?? ('SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))),
+            'payment_transaction_id' => $payment['transaction_id'],
             'placed_at' => now(),
         ]);
 
@@ -231,9 +246,10 @@ class CheckoutController extends Controller
             $product->save();
         }
 
-        // Clear the cart and checkout session data
+        // Clear the cart and temporary user data
         Cart::clear();
-        session()->forget(['shipping_info', 'payment_info']);
+        $user->temp_data = null;
+        $user->save();
         
         // Log successful order
         \Log::info('Order placed successfully', [
