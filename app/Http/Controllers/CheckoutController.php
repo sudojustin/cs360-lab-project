@@ -30,206 +30,132 @@ class CheckoutController extends Controller
     // Process shipping information
     public function processShipping(Request $request)
     {
-        try {
-            // Validate shipping information
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'address' => 'required|string|max:500',
-                'city' => 'required|string|max:255',
-                'state' => 'required|string|max:255',
-                'zip_code' => 'required|string|max:20',
-                'phone' => 'required|string|max:20',
-            ]);
-            
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-            
-            // Store shipping data in session
-            $shipping = [
-                'n' => $request->name,
-                'a' => $request->address,
-                'c' => $request->city,
-                's' => $request->state,
-                'z' => $request->zip_code,
-                'p' => $request->phone
-            ];
-            
-            // Store shipping data in session
-            session()->put('cs', $shipping);
-            session()->save();
-            
-            // Debug information
-            \Log::info('Shipping data stored in session', ['shipping' => $shipping]);
-            \Log::info('Cart contents', ['items' => Cart::getContent()->toArray()]);
-            
-            // Make sure the session data is persisted before redirect
-            session()->flash('shipping_completed', true);
-            
-            // Proceed to payment method
-            return redirect()->route('checkout.payment');
-        } catch (\Exception $e) {
-            \Log::error('Error in processShipping', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->back()
-                ->with('error', 'An error occurred while processing your shipping information. Please try again.')
-                ->withInput();
+        // Validate shipping information
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'zip_code' => 'required|string|max:20',
+            'phone' => 'required|string|max:20',
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
+        
+        // Store shipping data - using the original full keys
+        $shipping = [
+            'name' => $request->name,
+            'address' => $request->address,
+            'city' => $request->city,
+            'state' => $request->state,
+            'zip_code' => $request->zip_code,
+            'phone' => $request->phone
+        ];
+        
+        session(['shipping_info' => $shipping]);
+        
+        // Log for debugging
+        \Log::info('Shipping data stored', ['shipping' => $shipping]);
+        
+        // Proceed to payment method
+        return redirect()->route('checkout.payment');
     }
     
     // Step 2: Payment method selection
     public function payment()
     {
         // Check if shipping information is provided
-        if (!session()->has('cs')) {
+        if (!session()->has('shipping_info')) {
             return redirect()->route('checkout.shipping')->with('error', 'Please provide shipping information first.');
         }
         
-        // Check if cart is empty
-        if (Cart::isEmpty()) {
-            return redirect()->route('cart.list')->with('error', 'Your cart is empty. Please add items before checking out.');
-        }
+        // Proceed with cart items
+        $cartItems = Cart::getContent();
         
-        try {
-            // Get cart contents and store in session to ensure persistence
-            $cartItems = Cart::getContent();
-            $cartTotal = Cart::getTotal();
-            
-            // Log for debugging
-            \Log::info('Payment page accessed', [
-                'items_count' => $cartItems->count(),
-                'cart_items' => $cartItems->toArray(),
-                'total' => $cartTotal,
-                'session_shipping' => session('cs')
-            ]);
-            
-            return view('checkout.payment', [
-                'cart_items' => $cartItems,
-                'cart_total' => $cartTotal
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error in payment method', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->route('checkout.shipping')
-                ->with('error', 'An error occurred. Please try again.');
-        }
+        // Log for debugging
+        \Log::info('Payment page accessed', [
+            'items_count' => $cartItems->count(),
+            'items' => $cartItems->toArray()
+        ]);
+        
+        return view('checkout.payment', [
+            'cart_items' => $cartItems,
+            'cart_total' => Cart::getTotal()
+        ]);
     }
     
     // Process payment method
     public function processPayment(Request $request)
     {
-        try {
-            // Validate payment information (for format only - no actual processing)
-            $validator = Validator::make($request->all(), [
-                'payment_method' => 'required|in:credit_card',
-                'card_number' => 'required|string|min:15|max:16',
-                'card_name' => 'required|string|max:255',
-                'expiry_month' => 'required|numeric|min:1|max:12',
-                'expiry_year' => 'required|numeric|min:' . date('Y') . '|max:' . (date('Y') + 20),
-                'cvv' => 'required|string|min:3|max:4',
-            ]);
-            
-            if ($validator->fails()) {
-                return redirect()->back()->withErrors($validator)->withInput();
-            }
-            
-            // Store payment data
-            $paymentData = [
-                'm' => $request->payment_method,
-                'i' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))
-            ];
-            
-            // Store payment data in session
-            session()->put('cp', $paymentData);
-            session()->save();
-            
-            // Make sure the session data is persisted before redirect
-            session()->flash('payment_completed', true);
-            
-            // Log for debugging
-            \Log::info('Payment data stored', [
-                'payment' => $paymentData,
-                'cart_items' => Cart::getContent()->toArray(),
-                'cart_count' => Cart::getContent()->count(),
-                'cart_total' => Cart::getTotal()
-            ]);
-            
-            // Proceed to review
-            return redirect()->route('checkout.review');
-        } catch (\Exception $e) {
-            \Log::error('Error in processPayment', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->back()
-                ->with('error', 'An error occurred while processing your payment information. Please try again.')
-                ->withInput();
+        // Validate payment information (for format only - no actual processing)
+        $validator = Validator::make($request->all(), [
+            'payment_method' => 'required|in:credit_card',
+            'card_number' => 'required|string|min:15|max:16',
+            'card_name' => 'required|string|max:255',
+            'expiry_month' => 'required|numeric|min:1|max:12',
+            'expiry_year' => 'required|numeric|min:' . date('Y') . '|max:' . (date('Y') + 20),
+            'cvv' => 'required|string|min:3|max:4',
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
         }
+        
+        // Store payment data with full keys
+        $paymentData = [
+            'payment_method' => $request->payment_method,
+            'transaction_id' => 'SIM_' . strtoupper(substr(md5(uniqid()), 0, 6))
+        ];
+        
+        session(['payment_info' => $paymentData]);
+        
+        // Log for debugging
+        \Log::info('Payment data stored', [
+            'payment' => $paymentData,
+            'items_count' => Cart::getContent()->count()
+        ]);
+        
+        // Proceed to review
+        return redirect()->route('checkout.review');
     }
     
     // Step 3: Order review
     public function review()
     {
-        try {
-            // Check if all information is provided
-            if (!session()->has('cs') || !session()->has('cp')) {
-                return redirect()->route('checkout.shipping')->with('error', 'Please complete all checkout steps.');
-            }
-            
-            // Check if cart is empty
-            if (Cart::isEmpty()) {
-                return redirect()->route('cart.list')->with('error', 'Your cart is empty. Please add items before checking out.');
-            }
-            
-            // Get cart contents for display
-            $cartItems = Cart::getContent();
-            $cartTotal = Cart::getTotal();
-            
-            // Format shipping address for display
-            $shipping = session('cs');
-            $shipping_address = $shipping['n'] . "\n" . 
-                             $shipping['a'] . "\n" . 
-                             $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
-                             "Phone: " . $shipping['p'];
-            
-            // Log for debugging
-            \Log::info('Review page accessed', [
-                'items_count' => $cartItems->count(),
-                'cart_items' => $cartItems->toArray(),
-                'total' => $cartTotal,
-                'session_shipping' => $shipping,
-                'payment_method' => session('cp.m')
-            ]);
-            
-            return view('checkout.review', [
-                'cart_items' => $cartItems,
-                'cart_total' => $cartTotal,
-                'shipping_address' => $shipping_address,
-                'payment_method' => session('cp.m')
-            ]);
-        } catch (\Exception $e) {
-            \Log::error('Error in review method', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            return redirect()->route('checkout.shipping')
-                ->with('error', 'An error occurred. Please try again from the beginning.');
+        // Check if all information is provided
+        if (!session()->has('shipping_info') || !session()->has('payment_info')) {
+            return redirect()->route('checkout.shipping')->with('error', 'Please complete all checkout steps.');
         }
+        
+        // Get shipping info
+        $shipping = session('shipping_info');
+        $shipping_address = $shipping['name'] . "\n" . 
+                          $shipping['address'] . "\n" . 
+                          $shipping['city'] . ", " . $shipping['state'] . " " . $shipping['zip_code'] . "\n" .
+                          "Phone: " . $shipping['phone'];
+        
+        // Log for debugging
+        \Log::info('Review page accessed', [
+            'shipping' => $shipping,
+            'payment' => session('payment_info'),
+            'items_count' => Cart::getContent()->count()
+        ]);
+        
+        return view('checkout.review', [
+            'cart_items' => Cart::getContent(),
+            'cart_total' => Cart::getTotal(),
+            'shipping_address' => $shipping_address,
+            'payment_method' => session('payment_info.payment_method')
+        ]);
     }
     
     // Process the order
     public function placeOrder()
     {
         // Verify all required information is available
-        if (!session()->has('cs') || !session()->has('cp')) {
+        if (!session()->has('shipping_info') || !session()->has('payment_info')) {
             return redirect()->route('checkout.shipping')
                 ->with('error', 'Please complete all checkout steps.');
         }
@@ -255,14 +181,14 @@ class CheckoutController extends Controller
         }
 
         // Format shipping address from session data
-        $shipping = session('cs');
-        $shipping_address = $shipping['n'] . "\n" . 
-                          $shipping['a'] . "\n" . 
-                          $shipping['c'] . ", " . $shipping['s'] . " " . $shipping['z'] . "\n" .
-                          "Phone: " . $shipping['p'];
+        $shipping = session('shipping_info');
+        $shipping_address = $shipping['name'] . "\n" . 
+                          $shipping['address'] . "\n" . 
+                          $shipping['city'] . ", " . $shipping['state'] . " " . $shipping['zip_code'] . "\n" .
+                          "Phone: " . $shipping['phone'];
 
         // Get payment info from session
-        $payment = session('cp');
+        $payment = session('payment_info');
 
         // Create a new order
         $order = Order::create([
@@ -272,7 +198,7 @@ class CheckoutController extends Controller
             'shipping_address' => $shipping_address,
             'payment_status' => 'completed',
             'payment_provider' => 'Credit Card',
-            'payment_transaction_id' => $payment['i'],
+            'payment_transaction_id' => $payment['transaction_id'],
             'placed_at' => now(),
         ]);
 
@@ -293,7 +219,7 @@ class CheckoutController extends Controller
 
         // Clear the cart and checkout session data
         Cart::clear();
-        session()->forget(['cs', 'cp']);
+        session()->forget(['shipping_info', 'payment_info']);
 
         // Redirect to confirmation page
         return redirect()->route('checkout.confirmation', ['order' => $order->id]);
